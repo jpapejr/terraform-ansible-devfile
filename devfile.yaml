@@ -74,6 +74,7 @@ commands:
         if [ ! -f /tmp/.ansible.cfg ]; then
             echo '[defaults]' >> /tmp/.ansible.cfg
             echo 'local_tmp = /tmp' >> /tmp/.ansible.cfg
+            echo 'remote_tmp = /tmp' >> /tmp/.ansible.cfg
             echo 'inventory = ./inventory' >> /tmp/.ansible.cfg
         fi
   
