@@ -19,7 +19,7 @@ components:
           value: /tmp/.ansible.cfg  # Path for Ansible config file
       volumeMounts:
         - name: ansible-config
-          path: /tmp/.ansible.cfg
+          path: /tmp
   - name: ansible-config
     volume:
       size: 1Gi
