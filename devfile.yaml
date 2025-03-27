@@ -11,7 +11,7 @@ metadata:
 components:
   - name: tools
     container:
-      image: ghcr.io/jpapejr/terraform-ansible-devfile
+      image: quay.io/jtpape_nfr/terraform-ansible:latest
       args: ['tail', '-f', '/dev/null']
       mountSources: true
       env:
