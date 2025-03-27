@@ -15,8 +15,14 @@ components:
       args: ['tail', '-f', '/dev/null']
       mountSources: true
       env:
-        - name: DEBUG_PORT
-          value: '5858'
+        - name: ANSIBLE_CONFIG
+          value: /tmp/.ansible.cfg  # Path for Ansible config file
+      volumeMounts:
+        - name: ansible-config
+          path: /tmp/.ansible.cfg
+  - name: ansible-config
+    volume:
+      size: 1Gi
 commands:
   - id: install-prereqs
     exec:
