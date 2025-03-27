@@ -11,7 +11,8 @@ metadata:
 components:
   - name: tools
     container:
-      image: registry.access.redhat.com/ubi9/ubi
+      dockerfile:
+        uri: ./Dockerfile
       args: ['tail', '-f', '/dev/null']
       mountSources: true
       env:
