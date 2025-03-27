@@ -67,4 +67,12 @@ commands:
       component: tools
       commandLine: ansible --version # Command to check Ansible Version
       workingDir: ${PROJECT_SOURCE} # Executing in the project source directory
+  - id: create-ansible-config
+    exec:
+      component: tools
+      commandLine: |
+        if [ ! -f /tmp/.ansible.cfg ]; then
+            echo '[defaults]' >> /tmp/.ansible.cfg
+            echo 'inventory = ./inventory' >> /tmp/.ansible.cfg
+        fi
   
