@@ -1,77 +1,99 @@
-apiVersion: tekton.dev/v1alpha1
-kind: Devfile
+schemaVersion: 2.2.0
 metadata:
-  name: ansible-terraform-dev
-spec:
-  version: 0.1.0
-  provider:
-    name: devfile-registry.dev
-    url: https://devfile.io
-  components:
-    - name: main
-      image: mcr.microsoft.com/devcontainers/dev-shell:tizen
-      container:
-        ports:
-          - name: vscode
-            containerPort: 3000
-            protocol: tcp
-        volumeMounts:
-          - name: workspace
-            mountPath: /workspace
-        extensions:
-          - id: ms-vscode.vscode-remote-connect
-            path: .devcontainer
-          - id: redhat.ansible
-          - id: hashicorp.terraform
-          - id: ms-toolsai.continue
-          - id: ms-python.python
-          - id: ms-azuretools.vscode-azureaccount
-          - id: ms-vscode.vscode-kubernetes-tools
-      environment:
-        - name: VSCODE_PORT
-          value: "3000"
-      commands:
-        - name: terraform-init
-          container: main
-          args: ["terraform", "init"]
-        - name: terraform-fmt
-          container: main
-          args: ["terraform", "fmt", "-check"]
-        - name: ansible-lint
-          container: main
-          args: ["ansible-lint", "."]
-        - name: ansible-playbook
-          container: main
-          args: ["ansible-playbook", "-i", "inventory", "site.yml"]
-    - name: ollama
-      image: ollama/ollama
-      container:
-        ports:
-          - name: ollama-api
-            containerPort: 11434
-            protocol: tcp
-        volumeMounts:
-          - name: ollama-data
-            mountPath: /root/.ollama
-      resources:
-        requests:
-          memory: "4g"
-        limits:
-          memory: "8g"
-    - name: git-credentials
-      image: alpine/git
-      container:
-        volumeMounts:
-          - name: git-config
-            mountPath: /root/.gitconfig
-      commands:
-        - name: configure-git
-          container: git-credentials
-          args: ["git", "config", "--global", "user.email", "devspaces@example.com"]
-  volumes:
-    - name: workspace
-      emptyDir: {}
-    - name: git-config
-      emptyDir: {}
-    - name: ollama-data
-      emptyDir: {}
+  name: terraform-ansible-dev
+  version: 1.0.0
+  description: Workspace for Terraform and Ansible development with LLM capabilities
+components:
+  - name: tools
+    container:
+      image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+      command: ["sleep", "infinity"]
+      memoryLimit: 2Gi
+      env:
+        - name: ANSIBLE_CONFIG
+          value: /home/user/.ansible.cfg
+      volumeMounts:
+        - name: ansible-config
+          path: /home/user/.ansible.cfg
+  - name: vscode-theia
+    editor:
+      id: che-incubator/che-code/insiders
+    extensions:
+      - redhat.ansible
+      - ms-azuretools.vscode-azureterraform
+      - continue.continue
+  - name: ollama
+    container:
+      image: ollama/ollama:latest
+      ports:
+        - name: ollama-api
+          containerPort: 11434
+          protocol: TCP
+      command: ["ollama", "serve"]
+      memoryLimit: 4Gi
+      volumes:
+        - name: ollama-data
+          mountPath: /root/.ollama
+      env:
+        - name: OLLAMA_HOST
+          value: 0.0.0.0
+        - name: OLLAMA_LISTEN
+          value: ":11434"
+  commands:
+    - id: terraform-init
+      exec:
+        component: tools
+        commandLine: terraform init
+        workingDir: ${PROJECT_SOURCE}
+    - id: terraform-plan
+      exec:
+        component: tools
+        commandLine: terraform plan
+        workingDir: ${PROJECT_SOURCE}
+    - id: terraform-apply
+      exec:
+        component: tools
+        commandLine: terraform apply
+        workingDir: ${PROJECT_SOURCE}
+    - id: ansible-lint
+      exec:
+        component: tools
+        commandLine: ansible-lint --version
+        workingDir: ${PROJECT_SOURCE}
+    - id: ansible-playbook-syntax-check
+      exec:
+        component: tools
+        commandLine: ansible-playbook --syntax-check playbook.yml
+        workingDir: ${PROJECT_SOURCE}
+    - id: ansible-run
+      exec:
+        component: tools
+        commandLine: ansible-playbook -i inventory.ini playbook.yml
+        workingDir: ${PROJECT_SOURCE}
+    - id: ollama-pull-model
+      description: Pull an LLM model
+      args:
+        - name: model
+          type: string
+          default: llama2
+          description: Model to pull (e.g., llama2, mistral)
+      exec:
+        component: ollama
+        commandLine: ollama pull ${model}
+    - id: ollama-run
+      description: Run a query against a model
+      args:
+        - name: model
+          type: string
+          default: llama2
+          description: Model to use
+        - name: prompt
+          type: string
+          description: Query to send to the model
+      exec:
+        component: ollama
+        commandLine: ollama run ${model} "${prompt}"
+volumes:
+  - name: ansible-config
+    container:
+      path: /home/user/.ansible.cfg
