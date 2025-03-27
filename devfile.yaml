@@ -18,7 +18,7 @@ components:
         - name: DEBUG_PORT
           value: '5858'
 commands:
-  - id: Install pre-reqs
+  - id: install-prereqs
     exec:
       commandLine: apk add --no-cache terraform ansible openssh-client curl git
       workingDir: ${PROJECT_SOURCE}
