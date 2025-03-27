@@ -1,44 +1,64 @@
-schemaVersion: 2.2.0
+schemaVersion: 2.2.2
 metadata:
-  name: terraform-ansible-dev
+  name: terraform-and-ansible
+  displayName: Terraform and Ansible IaC Development
+  description: "This workspace template provides everything needed to begin working on IaC projects using Terraform and Ansible."
+  tags:
+    - terraform
+    - ansible
+    - iac
   version: 1.0.0
-  description: Workspace for Terraform and Ansible development with LLM capabilities
 components:
   - name: tools
     container:
-      image: registry.access.redhat.com/ubi9/ubi-minimal:latest
-      command: ["sleep", "infinity"]
-      memoryLimit: 2Gi
+      image: alpine/git:latest
+      args: ['tail', '-f', '/dev/null']
+      mountSources: true
       env:
-        - name: ANSIBLE_CONFIG
-          value: /home/user/.ansible.cfg
-      volumeMounts:
-        - name: ansible-config
-          path: /home/user/.ansible.cfg
-  - name: vscode-theia
-    editor:
-      id: che-incubator/che-code/insiders
-    extensions:
-      - redhat.ansible
-      - ms-azuretools.vscode-azureterraform
-      - continue.continue
-  - name: ollama
-    container:
-      image: ollama/ollama:latest
-      ports:
-        - name: ollama-api
-          containerPort: 11434
-          protocol: TCP
-      command: ["ollama", "serve"]
-      memoryLimit: 4Gi
-      volumes:
-        - name: ollama-data
-          mountPath: /root/.ollama
-      env:
-        - name: OLLAMA_HOST
-          value: 0.0.0.0
-        - name: OLLAMA_LISTEN
-          value: ":11434"
-  - name: ansible-config
-    volume:
-      size: 100Mi
+        - name: DEBUG_PORT
+          value: '5858'
+commands:
+  - id: Install pre-reqs
+    exec:
+      commandLine: apk add --no-cache terraform ansible openssh-client curl git
+      workingDir: ${PROJECT_SOURCE}
+      group:
+        kind: build
+        isDefault: true
+      component: tools
+  - id: terraform-init
+    exec:
+      component: tools
+      commandLine: terraform init  # Command to initialize Terraform
+      workingDir: ${PROJECT_SOURCE} # Executing in the project source directory
+  - id: terraform-plan
+    exec:
+      component: tools
+      commandLine: terraform plan  # Command to create Terraform plan
+      workingDir: ${PROJECT_SOURCE} # Executing in the project source directory
+  - id: terraform-apply
+    exec:
+      component: tools
+      commandLine: terraform apply # Command to apply Terraform changes
+      workingDir: ${PROJECT_SOURCE} # Executing in the project source directory
+  - id: ansible-lint
+    exec:
+      component: tools
+      commandLine: ansible-lint --version # Command to verify ansible-lint
+      workingDir: ${PROJECT_SOURCE} # Executing in the project source directory
+  - id: ansible-playbook-syntax-check
+    exec:
+      component: tools
+      commandLine: ansible-playbook --syntax-check playbook.yml # Command to verify playbook syntax
+      workingDir: ${PROJECT_SOURCE} # Executing in the project source directory
+  - id: ansible-playbook-run
+    exec:
+      component: tools
+      commandLine: ansible-playbook playbook.yml # Command to run the Ansible playbook
+      workingDir: ${PROJECT_SOURCE} # Executing in the project source directory
+  - id: ansible-version
+    exec:
+      component: tools
+      commandLine: ansible --version # Command to check Ansible Version
+      workingDir: ${PROJECT_SOURCE} # Executing in the project source directory
+  
