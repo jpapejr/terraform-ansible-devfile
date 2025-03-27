@@ -39,6 +39,9 @@ components:
           value: 0.0.0.0
         - name: OLLAMA_LISTEN
           value: ":11434"
+  - name: ansible-config
+    volume:
+      size: 100Mi
   commands:
     - id: terraform-init
       exec:
@@ -93,7 +96,3 @@ components:
       exec:
         component: ollama
         commandLine: ollama run ${model} "${prompt}"
-volumes:
-  - name: ansible-config
-    container:
-      path: /home/user/.ansible.cfg
