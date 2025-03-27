@@ -11,7 +11,7 @@ metadata:
 components:
   - name: tools
     container:
-      image: alpine/git:latest
+      image: registry.access.redhat.com/ubi9/ubi
       args: ['tail', '-f', '/dev/null']
       mountSources: true
       env:
@@ -20,7 +20,7 @@ components:
 commands:
   - id: install-prereqs
     exec:
-      commandLine: apk add --no-cache terraform ansible openssh-client curl git
+      commandLine: dnf install -y terraform ansible openssh-client curl git
       workingDir: ${PROJECT_SOURCE}
       group:
         kind: build
