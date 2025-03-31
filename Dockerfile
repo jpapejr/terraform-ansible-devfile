@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi9/ubi:latest
+FROM quay.io/devfile/base-developer-image:ubi-latest
 
 RUN yum -y update && \
     yum install -y unzip python312 pip && \
