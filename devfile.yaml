@@ -93,4 +93,21 @@ commands:
             echo 'remote_tmp = /tmp' >> /tmp/.ansible.cfg
             echo 'inventory = ./inventory' >> /tmp/.ansible.cfg
         fi
+  - id: pullmodel
+    exec:
+      component: ollama
+      commandLine: "ollama pull llama3:8b"
+  - id: pullautocompletemodel
+    exec:
+      component: ollama
+      commandLine: "ollama pull starcoder2:3b"
+  - id: copyconfig
+    exec:
+      component: udi
+      commandLine: "mkdir /home/user/.continue && cp /projects/cde-ollama-continue/continue-config.json /home/user/.continue/config.json"
+events:
+  postStart:
+    - pullmodel
+    - pullautocompletemodel
+    - copyconfig
   
