@@ -67,6 +67,11 @@ commands:
       component: tools
       commandLine: terraform apply # Command to apply Terraform changes
       workingDir: ${PROJECT_SOURCE} # Executing in the project source directory
+  - id: terraform-validate
+    exec:
+      component: tools
+      commandLine: terraform validate
+      workingDir: ${PROJECT_SOURCE}
   - id: ansible-lint
     exec:
       component: tools
@@ -100,7 +105,7 @@ commands:
   - id: pullmodel
     exec:
       component: ollama
-      commandLine: "ollama pull llama3:8b"
+      commandLine: "ollama pull hf.co/bartowski/WhiteRabbitNeo-2.5-Qwen-2.5-Coder-7B-GGUF:Q4_K_L"
   - id: pullautocompletemodel
     exec:
       component: ollama
