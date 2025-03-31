@@ -10,13 +10,13 @@ metadata:
   version: 1.0.0
 components:
   - name: tools
-    memoryLimit: 4Gi
-    memoryRequest: 2Gi
-    cpuLimit: 4000m
-    cpuRequest: 1000m
     container:
       image: quay.io/jtpape_nfr/terraform-ansible:latest
       args: ['tail', '-f', '/dev/null']
+      memoryLimit: 4Gi
+      memoryRequest: 2Gi
+      cpuLimit: 4000m
+      cpuRequest: 1000m
       mountSources: true
       env:
         - name: ANSIBLE_CONFIG
