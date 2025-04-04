@@ -27,31 +27,15 @@ components:
   - name: ansible-config
     volume:
       size: 1Gi
-  - name: ollama
-    attributes:
-      container-overrides:
-        resources:
-          limits:
-            cpu: 4000m
-            memory: 12Gi
-            # nvidia.com/gpu: 1 # Uncomment this if the pod shall be scheduled only on a GPU node
-          requests:
-            cpu: 1000m
-            memory: 8Gi
-            # nvidia.com/gpu: 1 # Uncomment this if the pod shall be scheduled only on a GPU node
+  - name: ibmcloud
+    container:
+      image: quay.io/jtpape_nfr/ibmcloud-cli:ubi9
+      mountSources: true
     container:
       image: docker.io/ollama/ollama:latest
       mountSources: true
       sourceMapping: /.ollama
 commands:
-  - id: install-prereqs
-    exec:
-      commandLine: dnf install -y terraform ansible openssh-client curl git
-      workingDir: ${PROJECT_SOURCE}
-      group:
-        kind: build
-        isDefault: true
-      component: tools
   - id: terraform-init
     exec:
       component: tools
@@ -61,6 +45,11 @@ commands:
     exec:
       component: tools
       commandLine: terraform plan  # Command to create Terraform plan
+      workingDir: ${PROJECT_SOURCE} # Executing in the project source directory
+  - id: terraform-lint
+    exec:
+      component: tools
+      commandLine: terraform validate # Command to run Terraform Lint
       workingDir: ${PROJECT_SOURCE} # Executing in the project source directory
   - id: terraform-apply
     exec:
@@ -102,21 +91,4 @@ commands:
             echo 'remote_tmp = /tmp' >> /tmp/.ansible.cfg
             echo 'inventory = ./inventory' >> /tmp/.ansible.cfg
         fi
-  - id: pullmodel
-    exec:
-      component: ollama
-      commandLine: "ollama pull hf.co/bartowski/WhiteRabbitNeo-2.5-Qwen-2.5-Coder-7B-GGUF:Q4_K_L"
-  - id: pullautocompletemodel
-    exec:
-      component: ollama
-      commandLine: "ollama pull starcoder2:3b"
-  - id: copyconfig
-    exec:
-      component: tools
-      commandLine: "mkdir /home/user/.continue && cp /projects/cde-ollama-continue/continue-config.json /home/user/.continue/config.json"
-events:
-  postStart:
-    - pullmodel
-    - pullautocompletemodel
-    - copyconfig
   
